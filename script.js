@@ -3739,7 +3739,13 @@ function drawWeeklyTasksCard(
    СОЗДАНИЕ КАРТИНКИ НЕДЕЛИ
    ========================================================= */
 
-function createWeekImage() {
+function createWeekImage(mode = "png") {
+    // На iPhone вкладку предпросмотра открываем сразу по нажатию,
+    // иначе Safari может заблокировать её как всплывающее окно.
+    const pdfWindow = mode === "pdf" ? window.open("", "_blank") : null;
+    if (pdfWindow) {
+        pdfWindow.document.write("<title>Подготовка PDF</title><p style='font:18px Arial;padding:30px'>Подготавливаем план недели…</p>");
+    }
 
     const monday =
         getMonday(
@@ -4123,6 +4129,48 @@ function createWeekImage() {
        СКАЧИВАНИЕ PNG
        ===================================================== */
 
+    if (mode === "pdf") {
+        try {
+            const pdf = createWeekPdf(canvas);
+            const url = URL.createObjectURL(pdf);
+            if (pdfWindow) {
+                pdfWindow.location.replace(url);
+            } else {
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "моя_неделя_" + dateToKey(monday) + ".pdf";
+                link.click();
+            }
+            // Не освобождаем URL слишком рано: Safari должен успеть открыть PDF.
+            setTimeout(() => URL.revokeObjectURL(url), 120000);
+        } catch (error) {
+            if (pdfWindow) pdfWindow.close();
+            console.error(error);
+            alert("Не удалось открыть PDF. Попробуйте ещё раз.");
+        }
+        return;
+    }
+
+    if (mode === "photo") {
+        canvas.toBlob(async blob => {
+            if (!blob) return alert("Не удалось подготовить изображение.");
+            const filename = "моя_неделя_" + dateToKey(monday) + ".png";
+            const file = new File([blob], filename, { type: "image/png" });
+            try {
+                if (navigator.canShare?.({ files: [file] })) {
+                    await navigator.share({ files: [file], title: "Моя неделя" });
+                } else {
+                    const url = URL.createObjectURL(blob);
+                    window.open(url, "_blank");
+                    setTimeout(() => URL.revokeObjectURL(url), 120000);
+                }
+            } catch (error) {
+                if (error.name !== "AbortError") alert("Не удалось открыть меню сохранения.");
+            }
+        }, "image/png");
+        return;
+    }
+
     canvas.toBlob(
         blob => {
 
@@ -4189,10 +4237,52 @@ function createWeekImage() {
 }
 
 
-saveWeekImage.addEventListener(
-    "click",
-    createWeekImage
-);
+// Формируем настоящий одностраничный PDF с изображением недельного плана.
+// Не требуются внешние библиотеки или подключение к сторонним сайтам.
+function createWeekPdf(canvas) {
+    const encoded = canvas.toDataURL("image/jpeg", 0.92).split(",")[1];
+    const binary = atob(encoded);
+    const jpeg = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) jpeg[i] = binary.charCodeAt(i);
+    const encoder = new TextEncoder();
+    const parts = [];
+    const offsets = [0];
+    let length = 0;
+    function append(value) {
+        const bytes = typeof value === "string" ? encoder.encode(value) : value;
+        parts.push(bytes);
+        length += bytes.length;
+    }
+    function object(number, value) {
+        offsets[number] = length;
+        append(`${number} 0 obj\n${value}\nendobj\n`);
+    }
+    append("%PDF-1.4\n");
+    object(1, "<< /Type /Catalog /Pages 2 0 R >>");
+    object(2, "<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
+    object(3, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 1000 750] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>");
+    offsets[4] = length;
+    append(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`);
+    append(jpeg);
+    append("\nendstream\nendobj\n");
+    const drawing = "q\n1000 0 0 750 0 0 cm\n/Im0 Do\nQ\n";
+    object(5, `<< /Length ${encoder.encode(drawing).length} >>\nstream\n${drawing}endstream`);
+    const xref = length;
+    append("xref\n0 6\n0000000000 65535 f \n");
+    for (let i = 1; i <= 5; i++) append(`${String(offsets[i]).padStart(10, "0")} 00000 n \n`);
+    append(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
+    return new Blob(parts, { type: "application/pdf" });
+}
+
+const isPhonePlanner = () => window.matchMedia("(max-width: 750px)").matches;
+saveWeekImage.addEventListener("click", () => createWeekImage(isPhonePlanner() ? "pdf" : "png"));
+
+// Отдельная возможность сохранить недельный план в галерею iPhone.
+const saveWeekPhoto = document.getElementById("saveWeekPhoto");
+if (saveWeekPhoto) {
+    saveWeekPhoto.addEventListener("click", () => createWeekImage("photo"));
+}
+
 
 
 /* =========================================================
