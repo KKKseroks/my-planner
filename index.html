@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Мой планер</title>
+
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#013c4c">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+<body>
+<div id="authOverlay" class="auth-overlay">
+  <div class="auth-panel">
+    <div class="auth-logo">M</div>
+    <h1>Мой планер</h1>
+    <p id="authMessage">Войдите, чтобы синхронизировать записи между устройствами.</p>
+    <form id="authForm">
+      <label for="authEmail">Электронная почта</label>
+      <input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com">
+      <label for="authPassword">Пароль (не менее 6 символов)</label>
+      <input id="authPassword" type="password" autocomplete="current-password" minlength="6" required>
+      <button id="loginButton" type="submit">Войти</button>
+      <button id="registerButton" type="button" class="secondary-auth">Создать аккаунт</button>
+    </form>
+    <p id="authError" role="alert" class="auth-error"></p>
+    <small>Для первого входа нужен интернет. Данные защищены правилами доступа Firebase.</small>
+  </div>
+</div>
+<div id="cloudStatus" class="cloud-status" aria-live="polite">Подключение…</div>
+<button id="logoutButton" class="logout-button" type="button" hidden>Выйти</button>
+
+<!-- =========================================================
+     БОКОВОЕ МЕНЮ
+     ========================================================= -->
+
+<aside class="sidebar">
+
+    <div class="sidebar-logo">
+        M
+    </div>
+
+    <nav class="sidebar-nav">
+
+        <button
+            id="calendarMenuButton"
+            class="sidebar-button active"
+            type="button"
+        >
+            <span class="sidebar-icon">📅</span>
+            <span class="sidebar-text">Календарь</span>
+        </button>
+
+        <button
+            id="plannerMenuButton"
+            class="sidebar-button"
+            type="button"
+        >
+            <span class="sidebar-icon">☑</span>
+            <span class="sidebar-text">Планер</span>
+        </button>
+
+        <button
+            id="habitsMenuButton"
+            class="sidebar-button"
+            type="button"
+        >
+            <span class="sidebar-icon">🌱</span>
+            <span class="sidebar-text">Привычки</span>
+        </button>
+
+    </nav>
+
+</aside>
+
+
+<main class="main-content">
+
+    <!-- =====================================================
+         КАЛЕНДАРЬ
+         ===================================================== -->
+
+    <section
+        id="calendarPage"
+        class="page active-page"
+    >
+
+        <div class="container">
+
+            <h1>Мой календарь</h1>
+
+
+            <!-- ПОИСК -->
+
+            <div class="search-block">
+
+                <div class="search-row">
+
+                    <div class="search-input-wrapper">
+
+                        <span class="search-icon">
+                            🔍
+                        </span>
+
+                        <input
+                            id="searchInput"
+                            type="search"
+                            placeholder="Найти запись..."
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+                    <button
+                        id="clearSearch"
+                        class="clear-search"
+                        type="button"
+                    >
+                        Очистить
+                    </button>
+
+                </div>
+
+                <div
+                    id="searchResults"
+                    class="search-results"
+                ></div>
+
+            </div>
+
+
+            <!-- ПЕРЕКЛЮЧЕНИЕ МЕСЯЦА -->
+
+            <div class="calendar-top">
+
+                <button
+                    id="prevMonth"
+                    type="button"
+                >
+                    ←
+                </button>
+
+                <h2 id="monthYear"></h2>
+
+                <button
+                    id="nextMonth"
+                    type="button"
+                >
+                    →
+                </button>
+
+            </div>
+
+
+            <!-- ДНИ НЕДЕЛИ -->
+
+            <div class="weekdays">
+
+                <div>Пн</div>
+                <div>Вт</div>
+                <div>Ср</div>
+                <div>Чт</div>
+                <div>Пт</div>
+                <div>Сб</div>
+                <div>Вс</div>
+
+            </div>
+
+
+            <div
+                id="calendar"
+                class="calendar"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ПЛАНЕР
+         ===================================================== -->
+
+    <section
+        id="plannerPage"
+        class="page"
+    >
+
+        <div class="planner-container">
+
+            <!-- ЗАГОЛОВОК -->
+
+            <div class="planner-heading">
+
+                <div>
+
+                    <h1>
+                        Планер дня
+                    </h1>
+
+                    <p>
+                        Распланируйте день по времени
+                        и отмечайте выполненные дела.
+                    </p>
+
+                </div>
+
+
+                <!-- НАСТРОЙКИ -->
+
+                <div class="planner-settings">
+
+                    <label>
+
+                        Начало дня
+
+                        <select
+                            id="plannerStartHour"
+                        ></select>
+
+                    </label>
+
+
+                    <label>
+
+                        Планировать до
+
+                        <select
+                            id="plannerEndHour"
+                        ></select>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- НАВИГАЦИЯ -->
+
+            <div class="planner-navigation">
+
+                <button
+                    id="plannerPrevDay"
+                    class="planner-arrow"
+                    type="button"
+                >
+                    ←
+                </button>
+
+
+                <div class="planner-date-block">
+
+                    <div
+                        id="plannerWeekday"
+                        class="planner-weekday"
+                    ></div>
+
+                    <div
+                        id="plannerDate"
+                        class="planner-date"
+                    ></div>
+
+                </div>
+
+
+                <button
+                    id="plannerNextDay"
+                    class="planner-arrow"
+                    type="button"
+                >
+                    →
+                </button>
+
+
+                <button
+                    id="plannerToday"
+                    class="today-button"
+                    type="button"
+                >
+                    Сегодня
+                </button>
+
+
+                <button
+                    id="saveWeekImage"
+                    class="save-week-button"
+                    type="button"
+                >
+                    🖼 Сохранить неделю
+                </button>
+
+            </div>
+
+
+            <!-- ПРОГРЕСС -->
+
+            <div class="day-progress">
+
+                <div class="progress-info">
+
+                    <span>
+                        Выполнено за день
+                    </span>
+
+                    <strong id="progressText">
+                        0 из 0
+                    </strong>
+
+                </div>
+
+                <div class="progress-track">
+
+                    <div
+                        id="progressBar"
+                        class="progress-bar"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 ЗАДАЧИ НА НЕДЕЛЮ
+                 ================================================= -->
+
+            <div class="weekly-tasks">
+
+                <div class="weekly-tasks-header">
+
+                    <div>
+
+                        <h2>
+                            Задачи на неделю
+                        </h2>
+
+                        <p id="weeklyTasksDates"></p>
+
+                    </div>
+
+
+                    <div
+                        id="weeklyTasksProgress"
+                        class="weekly-tasks-progress"
+                    >
+                        0 из 0
+                    </div>
+
+                </div>
+
+
+                <div class="weekly-task-add">
+
+                    <input
+                        id="weeklyTaskInput"
+                        type="text"
+                        placeholder="Добавить задачу на неделю..."
+                        autocomplete="off"
+                    >
+
+                    <button
+                        id="addWeeklyTask"
+                        type="button"
+                    >
+                        + Добавить
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="weeklyTaskList"
+                    class="weekly-task-list"
+                ></div>
+
+            </div>
+
+
+            <!-- РАСПИСАНИЕ -->
+
+            <div class="schedule-title-row">
+
+                <h2>
+                    Расписание дня
+                </h2>
+
+                <p>
+                    Нажмите на нужный час,
+                    чтобы добавить дело.
+                </p>
+
+            </div>
+
+
+            <div
+                id="dayPlanner"
+                class="day-planner"
+            ></div>
+
+        </div>
+
+    </section>
+
+    <!-- =====================================================
+         ТРЕКЕР ПРИВЫЧЕК
+         ===================================================== -->
+
+    <section id="habitsPage" class="page">
+        <div class="habits-container">
+            <div class="habits-heading">
+                <div>
+                    <h1>Трекер привычек</h1>
+                    <p>Формируйте полезные привычки и следите за регулярностью.</p>
+                </div>
+            </div>
+
+            <div class="habit-date-navigation">
+                <button id="habitPrevDay" type="button" aria-label="Предыдущий день">←</button>
+                <div>
+                    <strong id="habitSelectedDate"></strong>
+                    <span id="habitSelectedWeekday"></span>
+                </div>
+                <button id="habitNextDay" type="button" aria-label="Следующий день">→</button>
+                <button id="habitToday" type="button">Сегодня</button>
+            </div>
+
+            <div class="habit-add-row">
+                <input id="habitNameInput" type="text" maxlength="80"
+                       placeholder="Например: Читать 30 минут" autocomplete="off">
+                <button id="addHabitButton" type="button">+ Добавить привычку</button>
+            </div>
+
+            <div class="habit-summary-grid">
+                <div class="habit-summary-card">
+                    <span>Выполнено за выбранный день</span>
+                    <strong id="habitDayProgress">0 из 0</strong>
+                </div>
+                <div class="habit-summary-card">
+                    <span>Выполнено за неделю</span>
+                    <strong id="habitWeekProgress">0%</strong>
+                </div>
+                <div class="habit-summary-card">
+                    <span>Выполнено за месяц</span>
+                    <strong id="habitMonthProgress">0%</strong>
+                </div>
+            </div>
+
+            <div class="habits-list-heading">
+                <h2>Мои привычки</h2>
+                <span>Отмечайте привычки каждый день</span>
+            </div>
+            <div id="habitsList" class="habits-list"></div>
+        </div>
+    </section>
+
+</main>
+
+
+<!-- =========================================================
+     ОКНО КАЛЕНДАРЯ
+     ========================================================= -->
+
+<div
+    id="taskModal"
+    class="modal"
+>
+
+    <div class="modal-window">
+
+        <button
+            id="closeModal"
+            class="close-modal"
+            type="button"
+        >
+            ×
+        </button>
+
+
+        <h2 id="selectedDate"></h2>
+
+
+        <div class="form-group">
+
+            <label for="taskInput">
+                Название
+            </label>
+
+            <input
+                id="taskInput"
+                type="text"
+                placeholder="Например: Позвонить врачу"
+            >
+
+        </div>
+
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label for="taskTime">
+                    Время
+                </label>
+
+                <input
+                    id="taskTime"
+                    type="time"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="taskCategory">
+                    Категория
+                </label>
+
+                <select id="taskCategory">
+
+                    <option value="Задание">
+                        📝 Задание
+                    </option>
+
+                    <option value="Событие">
+                        ★ Событие
+                    </option>
+
+                    <option value="Праздник">
+                        🎁 Праздник
+                    </option>
+
+                    <option value="Встреча">
+                        👥 Встреча
+                    </option>
+
+                    <option value="Другое">
+                        📌 Другое
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-group">
+            <label for="taskPriority">Приоритет</label>
+            <select id="taskPriority">
+                <option value="high">🔴 Высокий</option>
+                <option value="medium" selected>🟡 Средний</option>
+                <option value="low">🟢 Низкий</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+
+            <input
+                id="customCategoryInput"
+                class="hidden"
+                type="text"
+                placeholder="Название категории"
+            >
+
+        </div>
+
+
+        <button
+            id="addTask"
+            class="primary-button"
+            type="button"
+        >
+            Добавить запись
+        </button>
+
+
+        <h3>
+            Записи на этот день
+        </h3>
+
+
+        <ul
+            id="taskList"
+            class="task-list"
+        ></ul>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     ОКНО ПЛАНЕРА
+     ========================================================= -->
+
+<div
+    id="plannerModal"
+    class="modal"
+>
+
+    <div class="modal-window">
+
+        <button
+            id="closePlannerModal"
+            class="close-modal"
+            type="button"
+        >
+            ×
+        </button>
+
+
+        <h2 id="plannerModalTitle">
+            Новое дело
+        </h2>
+
+
+        <div
+            id="plannerModalDate"
+            class="modal-date-info"
+        ></div>
+
+
+        <div class="form-group">
+
+            <label for="plannerTaskName">
+                Что нужно сделать?
+            </label>
+
+            <input
+                id="plannerTaskName"
+                type="text"
+                placeholder="Например: Подготовиться к занятию"
+            >
+
+        </div>
+
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label for="plannerTaskStart">
+                    Начало
+                </label>
+
+                <input
+                    id="plannerTaskStart"
+                    type="time"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="plannerTaskEnd">
+                    Окончание
+                </label>
+
+                <input
+                    id="plannerTaskEnd"
+                    type="time"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="plannerTaskNote">
+                Заметка
+            </label>
+
+            <textarea
+                id="plannerTaskNote"
+                rows="4"
+                placeholder="Дополнительная информация..."
+            ></textarea>
+
+        </div>
+
+
+        <div class="form-group">
+            <label for="plannerTaskPriority">Приоритет</label>
+            <select id="plannerTaskPriority">
+                <option value="high">🔴 Высокий</option>
+                <option value="medium" selected>🟡 Средний</option>
+                <option value="low">🟢 Низкий</option>
+            </select>
+        </div>
+
+        <div class="planner-modal-actions">
+
+            <button
+                id="savePlannerTask"
+                class="primary-button"
+                type="button"
+            >
+                Сохранить
+            </button>
+
+
+            <button
+                id="deletePlannerTask"
+                class="danger-button hidden"
+                type="button"
+            >
+                Удалить
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script type="module" src="sync.js"></script>
+
+</body>
+
+</html>
