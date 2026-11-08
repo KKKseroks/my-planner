@@ -1,6 +1,6 @@
 import { firebaseConfig } from './firebase-config.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, enableIndexedDbPersistence } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 const OWNER_KEY = 'plannerFirebaseOwnerUid';
@@ -151,6 +151,8 @@ async function start() {
   }
   const app = initializeApp(firebaseConfig);
   auth = getAuth(app); db = getFirestore(app);
+  // Сохраняем вход между запусками Safari и установленного PWA.
+  await setPersistence(auth, browserLocalPersistence);
   try { await enableIndexedDbPersistence(db); } catch (err) { console.warn('Кеш Firestore недоступен:', err); }
   onAuthStateChanged(auth, async user => {
     unsubscribe.forEach(fn => fn()); unsubscribe = [];

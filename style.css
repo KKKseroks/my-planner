@@ -1391,3 +1391,77 @@ h1 {
 .cloud-status { position: fixed; right: 12px; bottom: 12px; z-index: 1001; padding: 7px 11px; border-radius: 9px; background: #013c4c; color: #fff; font-size: 11px; box-shadow: 0 4px 15px #0002; pointer-events: none; }
 .logout-button { position: fixed; top: 10px; right: 10px; z-index: 1002; padding: 7px 12px; border: 1px solid #fbbf65; border-radius: 8px; background: #013c4c; color: #fbbf65; cursor: pointer; font-size: 12px; }
 @media (max-width: 550px) { .auth-panel { padding: 22px; } .cloud-status { bottom: 6px; right: 6px; max-width: 60vw; } .logout-button { top: 6px; right: 6px; } }
+
+
+/* =========================================================
+   iPHONE / МОБИЛЬНЫЙ ЭКРАН — версия 3
+   ========================================================= */
+@media (max-width: 600px) {
+  html { width: 100%; overflow-x: clip; -webkit-text-size-adjust: 100%; }
+  body { width: 100%; min-width: 0; overflow-x: clip; }
+  .sidebar {
+    position: fixed; top: auto; left: 0; right: 0; bottom: 0;
+    width: 100%; height: auto;
+    padding: 7px 10px calc(7px + env(safe-area-inset-bottom, 0px));
+    border-right: 0; border-top: 2px solid var(--gold);
+    z-index: 1000;
+  }
+  .sidebar-logo { display: none; }
+  .sidebar-nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .sidebar-button { min-width: 0; min-height: 51px; padding: 5px 2px; gap: 2px; }
+  .sidebar-icon { font-size: 20px; }
+  .sidebar-text { display: block; font-size: 10px; }
+  .main-content {
+    width: 100%; min-width: 0; margin-left: 0;
+    padding: calc(58px + env(safe-area-inset-top, 0px)) 10px calc(100px + env(safe-area-inset-bottom, 0px));
+  }
+  .container, .planner-container, .habits-container {
+    width: 100%; min-width: 0; max-width: 100%; padding: 14px 11px; border-radius: 13px;
+  }
+  .page, .search-row, .planner-heading, .planner-settings,
+  .planner-navigation, .weekly-tasks, .weekly-tasks-header,
+  .habit-date-navigation, .habit-add-row { min-width: 0; }
+  h1 { font-size: 23px; }
+  h2 { font-size: 19px; }
+  .calendar-top { gap: 6px; }
+  .calendar-top h2 { font-size: 17px; text-align: center; min-width: 0; }
+  .calendar-top button { flex: 0 0 36px; width: 36px; height: 38px; }
+  .weekdays, .calendar { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; padding: 4px; }
+  .weekdays > div { min-width: 0; font-size: 11px; }
+  .day, .empty-day { min-width: 0; min-height: 54px; }
+  .day { padding: 4px 2px; border-radius: 5px; }
+  .day-number { font-size: 12px; margin-bottom: 3px; }
+  .calendar-record { padding: 2px; margin-top: 2px; font-size: 8px; }
+  .search-row { gap: 6px; }
+  .search-input-wrapper { min-width: 0; }
+  .clear-search { padding: 0 10px; font-size: 12px; }
+  .planner-heading { gap: 13px; }
+  .planner-settings { flex-wrap: wrap; }
+  .planner-navigation { display: flex; flex-wrap: wrap; gap: 7px; padding: 9px; }
+  .planner-arrow { width: 38px; height: 40px; }
+  .planner-date-block { flex: 1 1 95px; }
+  .planner-weekday { font-size: 15px; }
+  .planner-date { font-size: 11px; }
+  .today-button { min-height: 40px; font-size: 12px; }
+  .save-week-button { flex: 1 1 100%; width: 100%; white-space: normal; }
+  .weekly-tasks { padding: 12px; }
+  .weekly-tasks-header { gap: 8px; }
+  .weekly-tasks-header h2 { font-size: 17px; }
+  .weekly-tasks-progress { padding: 7px 9px; }
+  .planner-hour { grid-template-columns: 53px minmax(0, 1fr); }
+  .planner-hour-time { padding: 11px 2px; }
+  .planner-task { gap: 8px; padding: 9px 6px; }
+  .planner-task-info, .weekly-task-title, .habit-card-info, .task-item-info { min-width: 0; overflow-wrap: anywhere; }
+  .habit-date-navigation { gap: 7px; padding: 9px; }
+  .habit-date-navigation > div { flex: 1 1 105px; min-width: 0; }
+  .habit-date-navigation button { padding: 8px 10px; }
+  .habit-summary-grid { grid-template-columns: 1fr; gap: 8px; }
+  .habit-summary-card { padding: 12px; }
+  .modal { padding: 10px; padding-top: calc(10px + env(safe-area-inset-top, 0px)); padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .modal-window { width: 100%; max-height: 85dvh; padding: 20px 15px; }
+  .auth-overlay { padding: 14px; padding-top: calc(14px + env(safe-area-inset-top, 0px)); padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+  .auth-panel { max-height: 90dvh; overflow-y: auto; }
+  .logout-button { top: calc(9px + env(safe-area-inset-top, 0px)); right: 10px; }
+  .cloud-status { bottom: calc(75px + env(safe-area-inset-bottom, 0px)); right: 10px; max-width: 70vw; }
+  input, select, textarea { max-width: 100%; font-size: 16px; }
+}
