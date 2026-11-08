@@ -3,6 +3,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/fireba
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, enableIndexedDbPersistence } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
+const OWNER_KEY = 'plannerFirebaseOwnerUid';
 const KEYS = ['calendarTasks','dailyPlannerTasks','weeklyPlannerTasks','plannerHabits','plannerHabitLogs','plannerStartHour','plannerEndHour'];
 const overlay = document.getElementById('authOverlay');
 const status = document.getElementById('cloudStatus');
@@ -19,6 +20,18 @@ const originalRemoveItem = Storage.prototype.removeItem;
 const setLocal = (key, value) => originalSetItem.call(localStorage, key, value);
 const getLocal = key => localStorage.getItem(key);
 function showStatus(message) { status.textContent = message; }
+function clearPlannerLocal() {
+  for (const key of KEYS) originalRemoveItem.call(localStorage, key);
+}
+function safeRefresh() {
+  if (pending.size || document.querySelector('.modal.active') ||
+      ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) {
+    sessionStorage.setItem('plannerNeedsRefresh', '1');
+    return;
+  }
+  sessionStorage.removeItem('plannerNeedsRefresh');
+  location.reload();
+}
 function errorMessage(error) {
   const codes = {
     'auth/invalid-email':'Неверный адрес почты.',
@@ -54,6 +67,17 @@ Storage.prototype.removeItem = function(key) {
 async function bootstrap(user) {
   activeUser = user;
   showStatus('Загрузка данных…');
+  // Не смешиваем локальные записи разных аккаунтов.
+  const owner = getLocal(OWNER_KEY);
+  if (owner !== user.uid) {
+    if (owner) {
+      clearPlannerLocal();
+    } else if (KEYS.some(key => getLocal(key) !== null)) {
+      const importOld = confirm('Найдены старые записи на этом устройстве. Перенести их в текущий аккаунт Firebase? Нажмите «Отмена», если это не ваши записи.');
+      if (!importOld) clearPlannerLocal();
+    }
+    setLocal(OWNER_KEY, user.uid);
+  }
   // До запуска существующего script.js получаем данные из облака.
   for (const key of KEYS) {
     const ref = remoteRef(key);
@@ -61,6 +85,7 @@ async function bootstrap(user) {
     if (snap.exists()) {
       const value = snap.data().value;
       if (value !== null && value !== undefined) setLocal(key, String(value));
+      else originalRemoveItem.call(localStorage, key);
     } else {
       const local = getLocal(key);
       if (local !== null) await setDoc(ref, { value: local, updatedAt: Date.now() });
@@ -89,15 +114,14 @@ async function bootstrap(user) {
       // Приложение держит данные в переменных. Для обновления интерфейса
       // требуется перезагрузка; не прерываем ввод текста в активной вкладке.
       if (document.visibilityState === 'hidden') sessionStorage.setItem('plannerNeedsRefresh','1');
-      else if (!document.querySelector('.modal.active') && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) location.reload();
-      else sessionStorage.setItem('plannerNeedsRefresh','1');
+      else safeRefresh();
     }, err => { showStatus('Ошибка доступа к облаку'); console.error(err); });
     unsubscribe.push(unsub);
   }
 }
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && sessionStorage.getItem('plannerNeedsRefresh') === '1') {
-    sessionStorage.removeItem('plannerNeedsRefresh'); location.reload();
+    safeRefresh();
   }
 });
 form.addEventListener('submit', async event => {
@@ -115,6 +139,9 @@ logoutButton.addEventListener('click', async () => {
   if (!confirm('Выйти из аккаунта? Несинхронизированные изменения могут быть потеряны.')) return;
   await Promise.allSettled([...pending.values()]);
   await signOut(auth);
+  clearPlannerLocal();
+  originalRemoveItem.call(localStorage, OWNER_KEY);
+  sessionStorage.removeItem('plannerNeedsRefresh');
   location.reload();
 });
 async function start() {
@@ -128,7 +155,7 @@ async function start() {
   onAuthStateChanged(auth, async user => {
     unsubscribe.forEach(fn => fn()); unsubscribe = [];
     initialized = false;
-    if (!user) { activeUser = null; overlay.hidden = false; logoutButton.hidden = true; showStatus('Войдите в аккаунт'); return; }
+    if (!user) { activeUser = null; clearPlannerLocal(); originalRemoveItem.call(localStorage, OWNER_KEY); overlay.hidden = false; logoutButton.hidden = true; showStatus('Войдите в аккаунт'); return; }
     try { await bootstrap(user); }
     catch (err) { errorLabel.textContent = errorMessage(err); showStatus('Не удалось загрузить данные'); }
   });
