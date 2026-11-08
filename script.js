@@ -3810,29 +3810,14 @@ function createWeekImage(mode = "png") {
 
     const colors = {
 
-        dark:
-            "#013c4c",
-
-        gold:
-            "#fbbf65",
-
-        goldLight:
-            "#ffd080",
-
-        background:
-            "#f3f5f7",
-
-        white:
-            "#ffffff",
-
-        gray:
-            "#66777d",
-
-        light:
-            "#f7f9fa",
-
-        border:
-            "#dce3e5"
+        dark: "#244c38",
+        gold: "#e7efdc",
+        goldLight: "#f4f5e9",
+        background: "#f6f5ed",
+        white: "#fffef9",
+        gray: "#66796c",
+        light: "#f0f5ec",
+        border: "#dbe5d7"
 
     };
 
@@ -4260,12 +4245,19 @@ function createWeekPdf(canvas) {
     append("%PDF-1.4\n");
     object(1, "<< /Type /Catalog /Pages 2 0 R >>");
     object(2, "<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
-    object(3, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 1000 750] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>");
+    object(3, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>");
     offsets[4] = length;
     append(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`);
     append(jpeg);
     append("\nendstream\nendobj\n");
-    const drawing = "q\n1000 0 0 750 0 0 cm\n/Im0 Do\nQ\n";
+    // A4 альбомный; изображение 4:3 без искажения, с полями для печати.
+    const availableW = 794, availableH = 547;
+    const scale = Math.min(availableW / canvas.width, availableH / canvas.height);
+    const w = +(canvas.width * scale).toFixed(2);
+    const h = +(canvas.height * scale).toFixed(2);
+    const x = +((842 - w) / 2).toFixed(2);
+    const y = +((595 - h) / 2).toFixed(2);
+    const drawing = `q\n${w} 0 0 ${h} ${x} ${y} cm\n/Im0 Do\nQ\n`;
     object(5, `<< /Length ${encoder.encode(drawing).length} >>\nstream\n${drawing}endstream`);
     const xref = length;
     append("xref\n0 6\n0000000000 65535 f \n");

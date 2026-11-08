@@ -1,4 +1,4 @@
-const CACHE = 'planner-shell-nature-v5';
+const CACHE = 'planner-shell-nature-polished-v7';
 const SHELL = ['./', './index.html', './style.css', './script.js', './sync.js', './firebase-config.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));

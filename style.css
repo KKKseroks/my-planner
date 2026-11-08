@@ -1571,3 +1571,99 @@ h1 { font-size:clamp(24px,3vw,34px); }
   .today-button { font-size:11px; }
 }
 @media (prefers-reduced-motion:reduce) { button { transition:none; } }
+
+
+/* ==========================================================
+   NATURE POLISHED v7 — desktop and iPhone layout
+   ========================================================== */
+:root { --dark:#244c38; --dark-hover:#32674a; --gold:#e7efdc; --gold-light:#f4f5e9; --background:#f6f5ed; --border:#dbe5d7; }
+html { background:var(--background); }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; color:#273d30; }
+.main-content { max-width: 1550px; margin-right:auto; }
+.container,.planner-container,.habits-container { max-width:1120px; padding:clamp(18px,3vw,36px); }
+.container::before,.planner-container::before,.habits-container::before { content:none; }
+.sidebar { background:#fffef9; }
+.sidebar-nav { gap:10px; }
+.sidebar-button { min-height:68px; }
+.planner-heading { align-items:center; }
+.planner-settings { flex-wrap:wrap; }
+.planner-navigation { flex-wrap:wrap; }
+.planner-date-block { flex:1 1 170px; }
+.save-week-button { flex:0 1 auto; white-space:normal; }
+.save-photo-button { display:none; }
+.weekdays,.calendar { gap:5px; }
+.day { min-width:0; }
+.day.today { box-shadow:inset 0 0 0 1px #3b7852; }
+.day-progress,.weekly-tasks,.habit-summary-card { box-shadow:0 2px 10px #284d3210; }
+.weekly-task-item,.habit-card,.task-item,.planner-task { min-width:0; }
+.habit-summary-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.auth-panel { max-width:420px; }
+.logout-button { top:12px; right:16px; }
+.cloud-status { bottom:16px; right:16px; }
+@media (max-width:900px) {
+  .planner-heading { align-items:flex-start; }
+  .planner-navigation { gap:10px; }
+  .save-week-button { flex:1 1 180px; }
+}
+@media (max-width:750px) {
+  .sidebar { position:fixed; left:0; right:0; top:auto; bottom:0; width:100%; height:auto; padding:7px 10px calc(7px + env(safe-area-inset-bottom,0px)); border-right:0; border-top:1px solid #dce6d6; box-shadow:0 -4px 22px #234b3517; }
+  .sidebar-logo { display:none; }
+  .sidebar-nav { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
+  .sidebar-button { min-height:53px; padding:5px 2px; gap:3px; }
+  .sidebar-text { display:block; font-size:11px; }
+  .sidebar-icon { font-size:20px; }
+  .main-content { margin:0; max-width:none; width:100%; padding:calc(58px + env(safe-area-inset-top,0px)) 10px calc(104px + env(safe-area-inset-bottom,0px)); }
+  .container,.planner-container,.habits-container { width:100%; max-width:100%; min-width:0; padding:17px 12px; border-radius:17px; }
+  .planner-heading { flex-direction:column; gap:12px; }
+  .planner-settings { width:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+  .planner-settings label { min-width:0; }
+  .planner-settings select { width:100%; min-width:0; }
+  .planner-navigation { display:grid; grid-template-columns:42px minmax(0,1fr) 42px; align-items:center; gap:8px; padding:10px; }
+  .planner-arrow { width:42px; height:42px; }
+  .planner-date-block { grid-column:2; grid-row:1; min-width:0; text-align:center; }
+  #plannerPrevDay { grid-column:1; grid-row:1; }
+  #plannerNextDay { grid-column:3; grid-row:1; }
+  .planner-weekday { font-size:clamp(14px,4vw,19px); overflow-wrap:anywhere; }
+  .planner-date { font-size:12px; }
+  .today-button { grid-column:1 / -1; grid-row:2; width:100%; }
+  #saveWeekImage { grid-column:1 / -1; grid-row:3; width:100%; min-height:45px; }
+  #saveWeekPhoto { display:block; grid-column:1 / -1; grid-row:4; width:100%; min-height:45px; }
+  .calendar-top { gap:8px; }
+  .calendar-top h2 { font-size:clamp(16px,4.3vw,22px); min-width:0; text-align:center; }
+  .weekdays,.calendar { grid-template-columns:repeat(7,minmax(0,1fr)); gap:3px; padding:4px; }
+  .weekdays > * { min-width:0; font-size:10px; }
+  .day,.empty-day { min-height:56px; min-width:0; }
+  .day { padding:5px 3px; border-radius:8px; }
+  .day-number { font-size:12px; }
+  .calendar-record { font-size:8px; padding:2px; }
+  .weekly-tasks { padding:13px; }
+  .weekly-tasks-header { gap:8px; }
+  .weekly-tasks-header h2 { font-size:17px; }
+  .weekly-task-add,.habit-add-row { display:flex; flex-direction:column; }
+  .weekly-task-add button,.habit-add-row button { width:100%; min-height:44px; }
+  .planner-hour { grid-template-columns:54px minmax(0,1fr); }
+  .planner-hour-time { padding:12px 3px; font-size:11px; }
+  .planner-task { gap:8px; padding:9px 7px; }
+  .habit-summary-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+  .habit-summary-card { padding:10px 6px; text-align:center; gap:5px; }
+  .habit-summary-card span { font-size:10px; overflow-wrap:anywhere; }
+  .habit-summary-card strong { font-size:20px; }
+  .habit-date-navigation { flex-wrap:wrap; gap:7px; padding:9px; }
+  .habit-date-navigation > div { min-width:0; flex:1 1 100px; }
+  .habit-date-navigation strong { font-size:15px; }
+  .habit-date-navigation button { min-height:42px; padding:8px 10px; }
+  .habit-card { gap:9px; padding:11px 9px; }
+  .habit-card-info,.task-item-info,.planner-task-info { min-width:0; overflow-wrap:anywhere; }
+  .logout-button { top:calc(8px + env(safe-area-inset-top,0px)); right:10px; font-size:11px; padding:8px 12px; }
+  .cloud-status { bottom:calc(79px + env(safe-area-inset-bottom,0px)); right:9px; max-width:65vw; font-size:10px; }
+  .modal { padding:10px; padding-top:calc(10px + env(safe-area-inset-top,0px)); padding-bottom:calc(10px + env(safe-area-inset-bottom,0px)); }
+  .modal-window { width:100%; max-height:85dvh; padding:20px 15px; }
+  input,select,textarea { max-width:100%; font-size:16px; }
+}
+@media (max-width:370px) {
+  .main-content { padding-left:6px; padding-right:6px; }
+  .container,.planner-container,.habits-container { padding:13px 8px; }
+  .habit-summary-card strong { font-size:17px; }
+  .planner-navigation { gap:5px; padding:7px; }
+  .planner-arrow { width:38px; }
+}
